@@ -1,22 +1,15 @@
 name: auto_generate_storybook
-description: "A new Flutter project."
+description: "Auto Generates a Storybook from your golden tests."
 
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 0.1.0
 
-
-version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
 
 dependencies:
-  flutter:
-    sdk: flutter
-  flutter_web_plugins:
-    sdk: flutter
-
   args: ^2.3.2
   checked_yaml: ^2.0.2
   cli_util: ^0.4.0
@@ -44,10 +37,4 @@ dev_dependencies:
   # https://pub.dev/packages/build_version
   build_version: ^2.1.1
 
-  flutter_test:
-    sdk: flutter
-
-  flutter_lints: ^3.0.1
-
-flutter:
-  uses-material-design: true
+  lints: ^1.0.0
