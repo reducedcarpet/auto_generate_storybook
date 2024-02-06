@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 import 'package:yaml/yaml.dart';
 
 Future<String?> getPackageName() async {

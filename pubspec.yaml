@@ -1,6 +1,7 @@
 name: auto_generate_storybook
 description: "Auto Generates a Storybook from your golden tests."
-
+repository: https://github.com/reducedcarpet/auto_generate_storybook
+homepage: https://github.com/reducedcarpet/auto_generate_storybook
 
 version: 0.1.0
 
@@ -30,6 +31,7 @@ dependencies:
   source_gen: ^1.5.0
   analyzer: ^6.2.0
   logging: ^1.0.0
+
 
 dev_dependencies:
   # Needed by build_version
