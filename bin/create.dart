@@ -88,5 +88,5 @@ Future<void> createFlutterWebProject(String projectName, String superPackageName
   await stderr.addStream(processBuild.stderr);
 
   // Wait for the process to complete and get the exit code
-  var exitCodeBuild = await processBuild.exitCode;
+  await processBuild.exitCode;
 }
