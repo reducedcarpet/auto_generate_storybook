@@ -9,10 +9,13 @@ import 'package:recase/recase.dart';
 
 import 'code_gen_constants.dart';
 
-Future<String> generateStoryFile() async {
+Future<String> generateStoryFile(String projectName) async {
   final List<FileSystemEntity> goldenImages = await findAllGoldenImages();
   final List<Expression> stories = await generateAllStories(goldenImages);
-  final List<Directive> directives = await generateAllDirectives(goldenImages);
+  final List<Directive> directives = await generateAllDirectives(
+    goldenImages,
+    projectName,
+  );
 
   final field = Field((b) => b
     ..name = 'stories'
@@ -37,7 +40,7 @@ Future<String> generateStoryFile() async {
 }
 
 Future<void> saveGeneratedStoryFile(String projectName) async {
-  final content = generateStoryFile();
+  final content = generateStoryFile(projectName);
   final file = File('$projectName/lib/generated/$storiesFileName');
   file.writeAsStringSync(await content);
 }
@@ -61,11 +64,14 @@ Expression generateStoryObjectForImage(String image, String path, String name) {
   return field;
 }
 
-Directive generateDirectiveForImage(String image) {
-  return Directive.import('package:storybook/generated/$image.g.dart');
+Directive generateDirectiveForImage(String image, String projectName) {
+  return Directive.import('package:$projectName/generated/$image.g.dart');
 }
 
-Future<List<Directive>> generateAllDirectives(List<FileSystemEntity> goldenImages) async {
+Future<List<Directive>> generateAllDirectives(
+  List<FileSystemEntity> goldenImages,
+  String projectName,
+) async {
   final List<Directive> directives = [];
 
   for (final FileSystemEntity image in goldenImages) {
@@ -78,7 +84,7 @@ Future<List<Directive>> generateAllDirectives(List<FileSystemEntity> goldenImage
 
     final relative = encodedDartPath(image);
 
-    directives.add(generateDirectiveForImage(relative));
+    directives.add(generateDirectiveForImage(relative, projectName));
   }
 
   return directives;

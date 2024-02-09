@@ -23,6 +23,7 @@ String generatePubSpecFile(String projectName) {
   buffer.writeln('dev_dependencies:');
   buffer.writeln('  flutter_test:');
   buffer.writeln('    sdk: flutter');
+  buffer.writeln('  flutter_lints: ^3.0.1');
   buffer.writeln("\n");
   buffer.writeln('flutter:');
   buffer.writeln('  uses-material-design: true');
