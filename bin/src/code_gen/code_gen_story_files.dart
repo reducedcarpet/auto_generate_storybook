@@ -1,16 +1,26 @@
 import 'dart:io';
 
-import 'package:auto_generate_storybook/code_gen/code_gen_utils.dart';
+import 'code_gen_story_list.dart';
+import 'code_gen_utils.dart';
+import 'code_gen_widgets.dart';
+import '../utils/recursive_utils.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:path/path.dart' as path;
+import 'package:recase/recase.dart';
 
-String generateImagePage(FileSystemEntity image) {
-  String basename = getPascalCaseName(image);
+String generateWidgetStoryPage(FileSystemEntity classFile) {
+  final String basename = path.basename(classFile.path);
+  print("basename: $basename");
+  print("classFile: ${classFile.path}");
+  ReCase reCase = ReCase(path.withoutExtension(basename));
+  final String pascalCaseName =  reCase.pascalCase;
 
-  final imagePage = Class(
+  String dirPascalCaseName = getPascalCaseName(classFile);
+
+  final widgetPage = Class(
     (b) => b
-      ..name = '${basename}StorybookScreen'
+      ..name = '${dirPascalCaseName}StorybookScreen'
       ..extend = refer('StatelessWidget', 'package:flutter/material.dart')
       ..constructors.add(
         Constructor(
@@ -44,16 +54,11 @@ String generateImagePage(FileSystemEntity image) {
             )
             ..body = Block.of(
               [
-                refer('Image', 'package:flutter/material.dart')
+                refer(pascalCaseName, 'package:flutter/material.dart')
                     .constInstance(
                       [],
                       {
-                        'image': refer('AssetImage', 'package:flutter/painting.dart')
-                            .newInstance(
-                          [
-                            literalString("assets/${encodedImagePath(image)}"),
-                          ],
-                        ),
+
                       },
                     )
                     .returned
@@ -66,11 +71,12 @@ String generateImagePage(FileSystemEntity image) {
 
   final library = Library(
     (b) => b
-      ..body.add(imagePage)
+      ..body.add(widgetPage)
       ..directives.addAll(
         [
           Directive.import('package:flutter/material.dart'),
           Directive.import('package:flutter/painting.dart'),
+          Directive.import('package:vtgfull/ui/screens/about_screen.dart'),
         ],
       ),
   );
@@ -81,26 +87,24 @@ String generateImagePage(FileSystemEntity image) {
 }
 
 Future<void> codeGenGoldens(String projectName) async {
-  final goldenImages = await findAllGoldenImages();
+  final goldenWidgets = await findAllWidgets();
+  final classFiles = <FileSystemEntity>[];
+
   Directory generateDir = Directory('$projectName/lib/generated');
   if (!await generateDir.exists()) {
     await generateDir.create();
   }
 
-  for (final FileSystemEntity image in goldenImages) {
-    var entityType = await FileSystemEntity.type(image.path);
-    if (entityType != FileSystemEntityType.file) {
-      continue;
+  for (final FileSystemEntity widgetFile in goldenWidgets) {
+    print("Checking: ${getPascalCaseName(widgetFile)}");
+    if(await checkFileViaAnalyzer(widgetFile.path)) {
+      classFiles.add(widgetFile);
+      final generatedPage = generateWidgetStoryPage(widgetFile);
+      final fileName = path.join(
+          generateDir.path, '${getKebabCaseName(widgetFile)}_storybook_widget.g.dart');
+      await saveGeneratedPage(fileName, generatedPage);
     }
-
-    String basename = path.basename(image.path);
-    String relative = encodedImagePath(image);
-
-    final encodedName = basename.endsWith('.png')
-        ? '${path.withoutExtension(relative)}.g.dart'
-        : relative;
-
-    final imagePage = generateImagePage(image);
-    await saveGeneratedPage('$projectName/lib/generated/$encodedName', imagePage);
   }
+
+  await saveGeneratedStoryFile(projectName, classFiles);
 }

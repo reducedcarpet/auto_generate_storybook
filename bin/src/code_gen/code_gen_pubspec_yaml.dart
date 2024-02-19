@@ -1,7 +1,34 @@
 import 'dart:io';
 
-String generatePubSpecFile(String projectName) {
+import '../utils/utils.dart';
+
+Future<String> generatePubSpecFile(String projectName) async {
   StringBuffer buffer = StringBuffer();
+
+  final pubSpec = await loadOriginalProjectPubspec();
+
+
+  final dependencies = pubSpec['dependencies'] as Map;
+  String dependenciesString = "";
+  dependencies.forEach((key, value) {
+    if(key == "flutter" || key == "flutter_web_plugins") {
+      return;
+    };
+
+    if (value is String) {
+      // Simple version dependency
+      dependenciesString += '  $key: $value\n';
+    } else if (value is Map) {
+      // SDK dependency or similar
+      var sdk = value['sdk'];
+      if (sdk != null) {
+        dependenciesString += '  $key:\n    sdk: $sdk\n';
+      }
+    }
+  });
+
+  print("\n pubSpec: ${dependenciesString}");
+
 
   buffer.writeln('name: $projectName');
   buffer.writeln('description: A new Flutter project.');
@@ -17,6 +44,9 @@ String generatePubSpecFile(String projectName) {
   buffer.writeln('    sdk: flutter');
   buffer.writeln('  flutter_web_plugins:');
   buffer.writeln('    sdk: flutter');
+  buffer.writeln(dependenciesString);
+  buffer.writeln("  ${pubSpec["name"]}:");
+  buffer.writeln('    path: ../');
   buffer.writeln('');
   buffer.writeln('  storybook_flutter: ^0.14.0');
   buffer.writeln("\n");
@@ -28,14 +58,14 @@ String generatePubSpecFile(String projectName) {
   buffer.writeln('flutter:');
   buffer.writeln('  uses-material-design: true');
   buffer.writeln('  assets:');
-  buffer.writeln('    - assets/');
+  buffer.writeln('    - ../assets/');
   buffer.writeln("\n");
 
   return buffer.toString();
 }
 
-void saveGeneratedPubSpecFile(String projectName) {
-  final content = generatePubSpecFile(projectName);
+Future<void> saveGeneratedPubSpecFile(String projectName) async {
+  final content = await generatePubSpecFile(projectName);
   final file = File('$projectName/pubspec.yaml');
   file.writeAsStringSync(content);
 }

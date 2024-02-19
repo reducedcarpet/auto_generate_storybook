@@ -22,7 +22,7 @@ dependencies:
   storybook_flutter: ^0.14.0
   recase: ^4.1.0
   source_gen: ^1.5.0
-  analyzer: ^6.2.0
+  analyzer: ^6.4.1
   logging: ^1.0.0
 
 
