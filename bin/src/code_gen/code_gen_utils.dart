@@ -59,8 +59,6 @@ String getPascalCaseName(FileSystemEntity image) {
 
 String getKebabCaseName(FileSystemEntity image) {
   String imagePath = encodedKebabPath(image);
-  print("imagePath: $imagePath");
   String basename = path.withoutExtension(imagePath);
-  print("basename: $basename");
   return basename;
 }

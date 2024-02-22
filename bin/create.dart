@@ -1,9 +1,8 @@
 import 'package:args/args.dart';
-import 'src/code_gen/code_gen_story_files.dart';
+import 'src/code_gen/story_files/code_gen_story_files_stateless.dart';
 import 'src/code_gen/code_gen_main.dart';
 import 'src/code_gen/code_gen_pubspec_yaml.dart';
-import 'src/code_gen/code_gen_story_list.dart';
-import 'src/code_gen/code_gen_utils.dart';
+import 'src/code_gen/code_gen_storybook_adaptor.dart';
 import 'src/utils/file_utils.dart';
 import 'package:cli_util/cli_logging.dart';
 
@@ -38,21 +37,21 @@ Future<void> createFlutterWebProject(String projectName, String superPackageName
     return;
   }
 
-  Logger.standard().stdout('Project $projectName created successfully.');
+  Logger.standard().stdout('Project $projectName created successfully within $superPackageName.');
 
   deleteTestDirectory(projectName);
   Logger.standard().stdout('Deleted Test Directory of new Project.');
 
-  await generateGoldenCode(projectName);
+  await generateCode(projectName, superPackageName);
 
- // await dartFixApply(projectName);
+  //await dartFixApply(projectName);
 
- // await flutterBuildWeb(projectName);
+  //await flutterBuildWeb(projectName);
 }
 
-Future<void> generateGoldenCode(String projectName) async {
+Future<void> generateCode(String projectName, String originalProjectName) async {
   // generate code
-  await codeGenGoldens(projectName);
+  await codeGenStoryFiles(projectName, originalProjectName);
   Logger.standard().stdout('Project $projectName generated goldens successfully.');
   Logger.standard().stdout('Project $projectName generated stories.dart successfully.');
 
@@ -62,4 +61,7 @@ Future<void> generateGoldenCode(String projectName) async {
   // pull in dependencies from top-level pubspec, along with assets and fonts.
   await saveGeneratedPubSpecFile(projectName);
   Logger.standard().stdout('Project $projectName generated pubspec.yaml successfully.');
+
+  await saveGeneratedStorybookAdaptorFile(projectName);
+  Logger.standard().stdout('Project $projectName generated storybook_adaptor.dart successfully.');
 }

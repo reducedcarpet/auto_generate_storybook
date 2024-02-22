@@ -40,7 +40,7 @@ Future<String> generateStoryFile(String projectName, List<FileSystemEntity> clas
   return DartFormatter().format('${library.accept(emitter)}');
 }
 
-Future<void> saveGeneratedStoryFile(String projectName, List<FileSystemEntity> classNames) async {
+Future<void> saveGeneratedStoryFileStateless(String projectName, List<FileSystemEntity> classNames) async {
   final content = generateStoryFile(projectName, classNames);
   final file = File('$projectName/lib/generated/$storiesFileName');
   file.writeAsStringSync(await content);
@@ -65,7 +65,7 @@ Expression generateStoryObjectForClass(String className, String path, String nam
   return field;
 }
 
-Directive generateDirectiveForImage(FileSystemEntity widgetFile, String projectName) {
+Directive generateDirectiveForWidget(FileSystemEntity widgetFile, String projectName) {
   final fileName = '${getKebabCaseName(widgetFile)}_storybook_widget.g.dart';
   return Directive.import('package:$projectName/generated/$fileName');
 }
@@ -84,7 +84,7 @@ Future<List<Directive>> generateAllDirectives(
 
     Logger.standard().stdout('Generating Story object for $fileEntity');
 
-    directives.add(generateDirectiveForImage(fileEntity, projectName));
+    directives.add(generateDirectiveForWidget(fileEntity, projectName));
   }
 
   return directives;

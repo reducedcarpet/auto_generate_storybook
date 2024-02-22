@@ -8,6 +8,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
@@ -25,12 +26,17 @@ bool containsStatelessWidget(String fileContent) {
   return fileContent.contains('extends StatelessWidget');
 }
 
+bool containsStatefulWidget(String fileContent) {
+  // This is a simple and naive way to check; it might not be accurate
+  return fileContent.contains('extends StatefulWidget');
+}
+
 Future<bool> checkFileForStatelessWidget(FileSystemEntity file) async {
   String content = await readFileContent(file);
   return containsStatelessWidget(content);
 }
 
-Future<bool> checkFileViaAnalyzer(String filePath) async {
+Future<bool> checkFileViaAnalyzerStatelessWidgets(String filePath) async {
   String fileContent = await File(filePath).readAsString();
 
   // Parse the file content
@@ -42,9 +48,7 @@ Future<bool> checkFileViaAnalyzer(String filePath) async {
   // Now you can explore the AST. For example, printing all class declarations:
   for (ClassDeclaration classDecl
       in compilationUnit.declarations.whereType<ClassDeclaration>()) {
-    if(isStatelessWidget(compilationUnit, classDecl)) {
-      print("Found a stateless widget: ${classDecl.name}");
-
+    if (isStatelessWidget(compilationUnit, classDecl)) {
       if (hasEmptyOrDefaultConstructor(compilationUnit, classDecl.name.toString())) {
         return true;
       }
@@ -57,8 +61,8 @@ Future<bool> checkFileViaAnalyzer(String filePath) async {
 bool hasEmptyOrDefaultConstructor(CompilationUnit unit, String className) {
   final classDeclaration = unit.declarations.whereType<ClassDeclaration?>().firstWhere(
         (declaration) => declaration?.name.toString() == className,
-    orElse: () => null,
-  );
+        orElse: () => null,
+      );
 
   if (classDeclaration == null) return false;
 
@@ -123,7 +127,7 @@ ClassDeclaration? findClassByName(CompilationUnit unit, String className) {
       print("\n\nFOUND IT!");
       return declaration;
     }
-    index ++;
+    index++;
   }
   print("Returning null having checked $index classes.");
 
